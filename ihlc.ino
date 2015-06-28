@@ -16,15 +16,13 @@
 
 #include <DMXSerial.h>
 #include <Indio.h>
-#include <IndIOButtonPanel.h>
 #include <SoftReset.h>
-#include <UC1701.h>
 
 
-static UC1701 lcd;
-IndIOButtonPanel btns;
+#include "menus.h"
+
+
 static const int rs485EnablePin = 9;
-static const int backlightPin = 13;
 
 int currentValue = 0;
 
@@ -32,12 +30,7 @@ int currentValue = 0;
 void setup()
 {
   // Setup the screen and panel buttons
-  lcd.begin();
-  pinMode(backlightPin, OUTPUT);
-  analogWrite(backlightPin, 128);
-  lcd.clear();
-  lcd.println("IHLC Ready.");
-  btns = IndIOButtonPanel();
+  setupMenus();
 
   // Setup RS-485
   DMXSerial.init(DMXController);
@@ -54,46 +47,11 @@ void setup()
 
 void loop()
 {
-  handlePanelButtons();
+  handleMenus();
   
   if (Indio.digitalRead(1)) {
     DMXSerial.write(6, 255);
   } else {
     DMXSerial.write(6, 0);
-  }
-}
-
-
-
-void handlePanelButtons() {
-  int currentButton = NONE_PRESSED;
-  static int lastButton = NONE_PRESSED;
-
-  currentButton = btns.readButtonPanel();
-  if (currentButton != lastButton) {
-    lastButton = currentButton;
-
-    switch (currentButton){
-      case ENTER_PRESSED:
-        soft_restart();
-        break;
-      case UP_PRESSED:
-        currentValue += 1;
-        if (currentValue > 100)
-          currentValue = 100;
-        break;
-      case DOWN_PRESSED:
-        currentValue -= 1;
-        if (currentValue < 0)
-          currentValue = 0;
-        break;
-    }
-
-    DMXSerial.write(1, map(currentValue, 0, 100, 0, 255));
-    lcd.setCursor(0,2);
-    lcd.print("Value: ");
-    lcd.print(currentValue, DEC);
-    lcd.print("%  ");
-
   }
 }
