@@ -36,17 +36,17 @@ static void switchMenus(menuFunc_t func)
 static char scrollMenuItemCursor(char button, char max=6)
 {
     switch (button) {
-      case ENTER_PRESSED:
+    case ENTER_PRESSED:
         return currentMenuItem;
-      case UP_PRESSED:
+    case UP_PRESSED:
         currentMenuItem -= 1;
         if (currentMenuItem < 1)
-          currentMenuItem = 1;
+            currentMenuItem = 1;
         break;
-      case DOWN_PRESSED:
+    case DOWN_PRESSED:
         currentMenuItem += 1;
         if (currentMenuItem > max)
-          currentMenuItem = max;
+            currentMenuItem = max;
         break;
     }
 
@@ -64,23 +64,23 @@ static char scrollMenuItemCursor(char button, char max=6)
 static void menu1(char action)
 {
     if (action == MENU_SETUP) {
-      lcd.println(F("Sub Menu 1"));
-      lcd.println(F(" Item 1"));
-      lcd.println(F(" Item 2"));
-      lcd.println(F(" Exit"));
+        lcd.println(F("Sub Menu 1"));
+        lcd.println(F(" Item 1"));
+        lcd.println(F(" Item 2"));
+        lcd.println(F(" Exit"));
     }
 
     char item = scrollMenuItemCursor(action, 3);
     switch (item) {
-      case 1:
+    case 1:
         lcd.clear();
         lcd.println(F("Selected 1"));
         break;
-      case 2:
+    case 2:
         lcd.clear();
         lcd.println(F("Selected 2"));
         break;
-      case 3:
+    case 3:
         switchMenus(mainMenu);
         break;
     }
@@ -90,28 +90,28 @@ static void menu1(char action)
 static void testInputs(char action)
 {
     switch(action) {
-      case ENTER_PRESSED:
+    case ENTER_PRESSED:
         switchMenus(mainMenu);
         break;
-      case MENU_SETUP:
+    case MENU_SETUP:
         lcd.clear();
         lcd.println("Input State:");
         lcd.println();
         lcd.println("  12345678");
         lcd.print("  ");
         for(int pin=1; pin <= 8; pin++) {
-          lcd.write(0x02);
+            lcd.write(0x02);
         }
-        // no break
-      case MENU_REFRESH:
+    // no break
+    case MENU_REFRESH:
         int inputs = Indio.gpio_read();
         lcd.setCursor(8*2, 4);
         for(int pin=1; pin <= 8; pin++) {
-          if (bitRead(inputs, pin*2-2)) {
-            lcd.print('1');
-          } else {
-            lcd.print('0');
-          }
+            if (bitRead(inputs, pin*2-2)) {
+                lcd.print('1');
+            } else {
+                lcd.print('0');
+            }
         }
         break;
     }
@@ -132,19 +132,19 @@ static void mainMenu(char action)
 
     char item = scrollMenuItemCursor(action, 5);
     switch (item) {
-      case 1:
+    case 1:
         setAll(0);
         break;
-      case 2:
+    case 2:
         setAll(255);
         break;
-      case 3:
+    case 3:
         switchMenus(menu1);
         break;
-      case 4:
+    case 4:
         switchMenus(testInputs);
         break;
-      case 5:
+    case 5:
         lcd.clear();
         soft_restart();
         break;
@@ -154,27 +154,27 @@ static void mainMenu(char action)
 
 void setupMenus()
 {
-  lcd.begin();
-  lcd.createChar(0x01, arrowGlyph);
-  lcd.createChar(0x02, arrowDown);
+    lcd.begin();
+    lcd.createChar(0x01, arrowGlyph);
+    lcd.createChar(0x02, arrowDown);
 
-  pinMode(backlightPin, OUTPUT);
-  analogWrite(backlightPin, 128);
+    pinMode(backlightPin, OUTPUT);
+    analogWrite(backlightPin, 128);
 
-  switchMenus(mainMenu);
+    switchMenus(mainMenu);
 }
 
 
 void handleMenus()
 {
-  int currentButton = NONE_PRESSED;
-  static int lastButton = NONE_PRESSED;
+    int currentButton = NONE_PRESSED;
+    static int lastButton = NONE_PRESSED;
 
-  currentButton = btns.readButtonPanel();
-  if (currentButton != lastButton) {
-    lastButton = currentButton;
-    currentMenu(currentButton);
-  } else {
-    currentMenu(MENU_REFRESH);
-  }
+    currentButton = btns.readButtonPanel();
+    if (currentButton != lastButton) {
+        lastButton = currentButton;
+        currentMenu(currentButton);
+    } else {
+        currentMenu(MENU_REFRESH);
+    }
 }
