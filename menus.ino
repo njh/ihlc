@@ -1,3 +1,5 @@
+#include "ihlc.h"
+
 #include <UC1701.h>
 #include <IndIOButtonPanel.h>
 
@@ -81,24 +83,25 @@ static void mainMenu(char button)
 {
     if (button == NONE_PRESSED) {
         lcd.clear();
-        lcd.println(F("Main Menu"));
-        lcd.println(F(" Item 1"));
-        lcd.println(F(" Item 2"));
-        lcd.println(F(" Item 3"));
-        lcd.println(F(" Item 4"));
-        lcd.println(F(" Reset"));
+        lcd.println(F("IHLC Main Menu"));
+        lcd.println(F(" All Off"));     // 1
+        lcd.println(F(" All On"));      // 2
+        lcd.println(F(" Sub Menu 2"));  // 3
+        lcd.println(F(" Test Inputs")); // 4
+        lcd.println(F(" Reset"));       // 5
     }
 
     char item = scrollMenuItemCursor(button, 5);
     switch (item) {
-      case -1:
-        break;
       case 1:
-        switchMenus(menu1);
+        setAll(0);
         break;
       case 2:
-        lcd.clear();
-        lcd.println(F("Selected 2"));
+        setAll(255);
+        break;
+      case 3:
+        switchMenus(menu1);
+        break;
         break;
       case 5:
         lcd.clear();

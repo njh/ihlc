@@ -19,6 +19,7 @@
 #include <SoftReset.h>
 
 
+#include "ihlc.h"
 #include "menus.h"
 
 
@@ -48,10 +49,17 @@ void setup()
 void loop()
 {
   handleMenus();
-  
+
   if (Indio.digitalRead(1)) {
     DMXSerial.write(6, 255);
   } else {
     DMXSerial.write(6, 0);
   }
+}
+
+void setAll(uint8_t value)
+{
+    for(int i=1; i <= NUM_CHANNELS; i++) {
+        DMXSerial.write(i, value);
+    }
 }
