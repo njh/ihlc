@@ -10,10 +10,19 @@ static const int backlightPin = 13;
 
 // A custom arrow glyph
 static const unsigned char arrowGlyph[] = { 0x00, 0x7f, 0x3e, 0x1c, 0x08 };
+static const unsigned char arrowDown[] = { 0x10, 0x20, 0x7e, 0x20, 0x10 };
 
 // Pointer to the current menu function
 static char currentMenuItem = 1;
 menuFunc_t currentMenu = NULL;
+
+// Menu action definitions
+//const int NONE_PRESSED = 0;
+//const int ENTER_PRESSED = 1;
+//const int UP_PRESSED = 2;
+//const int DOWN_PRESSED = 3;
+const int MENU_SETUP = 8;
+const int MENU_REFRESH = 16;
 
 
 static void switchMenus(menuFunc_t func)
@@ -21,7 +30,7 @@ static void switchMenus(menuFunc_t func)
     lcd.clear();
     currentMenu = func;
     currentMenuItem = 1;
-    currentMenu(NONE_PRESSED);
+    currentMenu(MENU_SETUP);
 }
 
 static char scrollMenuItemCursor(char button, char max=6)
@@ -52,16 +61,16 @@ static char scrollMenuItemCursor(char button, char max=6)
 }
 
 
-static void menu1(char button)
+static void menu1(char action)
 {
-    if (button == NONE_PRESSED) {
+    if (action == MENU_SETUP) {
       lcd.println(F("Sub Menu 1"));
       lcd.println(F(" Item 1"));
       lcd.println(F(" Item 2"));
       lcd.println(F(" Exit"));
     }
 
-    char item = scrollMenuItemCursor(button, 3);
+    char item = scrollMenuItemCursor(action, 3);
     switch (item) {
       case 1:
         lcd.clear();
@@ -78,10 +87,40 @@ static void menu1(char button)
 
 }
 
-
-static void mainMenu(char button)
+static void testInputs(char action)
 {
-    if (button == NONE_PRESSED) {
+    switch(action) {
+      case ENTER_PRESSED:
+        switchMenus(mainMenu);
+        break;
+      case MENU_SETUP:
+        lcd.clear();
+        lcd.println("Input State:");
+        lcd.println();
+        lcd.println("  12345678");
+        lcd.print("  ");
+        for(int pin=1; pin <= 8; pin++) {
+          lcd.write(0x02);
+        }
+        // no break
+      case MENU_REFRESH:
+        int inputs = Indio.gpio_read();
+        lcd.setCursor(8*2, 4);
+        for(int pin=1; pin <= 8; pin++) {
+          if (bitRead(inputs, pin*2-2)) {
+            lcd.print('1');
+          } else {
+            lcd.print('0');
+          }
+        }
+        break;
+    }
+}
+
+
+static void mainMenu(char action)
+{
+    if (action == MENU_SETUP) {
         lcd.clear();
         lcd.println(F("IHLC Main Menu"));
         lcd.println(F(" All Off"));     // 1
@@ -91,7 +130,7 @@ static void mainMenu(char button)
         lcd.println(F(" Reset"));       // 5
     }
 
-    char item = scrollMenuItemCursor(button, 5);
+    char item = scrollMenuItemCursor(action, 5);
     switch (item) {
       case 1:
         setAll(0);
@@ -102,6 +141,8 @@ static void mainMenu(char button)
       case 3:
         switchMenus(menu1);
         break;
+      case 4:
+        switchMenus(testInputs);
         break;
       case 5:
         lcd.clear();
@@ -114,7 +155,8 @@ static void mainMenu(char button)
 void setupMenus()
 {
   lcd.begin();
-  lcd.createChar(1, arrowGlyph);
+  lcd.createChar(0x01, arrowGlyph);
+  lcd.createChar(0x02, arrowDown);
 
   pinMode(backlightPin, OUTPUT);
   analogWrite(backlightPin, 128);
@@ -125,14 +167,14 @@ void setupMenus()
 
 void handleMenus()
 {
-    int currentButton = NONE_PRESSED;
-    static int lastButton = NONE_PRESSED;
+  int currentButton = NONE_PRESSED;
+  static int lastButton = NONE_PRESSED;
 
-    currentButton = btns.readButtonPanel();
-    if (currentButton != lastButton) {
-        lastButton = currentButton;
-        if (currentMenu && currentButton != NONE_PRESSED) {
-            currentMenu(currentButton);
-        }
-    }
+  currentButton = btns.readButtonPanel();
+  if (currentButton != lastButton) {
+    lastButton = currentButton;
+    currentMenu(currentButton);
+  } else {
+    currentMenu(MENU_REFRESH);
+  }
 }
