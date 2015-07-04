@@ -167,12 +167,16 @@ void handleMenus()
 {
     int currentButton = NONE_PRESSED;
     static int lastButton = NONE_PRESSED;
+    static unsigned long lastRefresh = 0;
 
     currentButton = btns.readButtonPanel();
     if (currentButton != lastButton) {
         lastButton = currentButton;
         currentMenu(currentButton);
     } else {
-        currentMenu(MENU_REFRESH);
+        if (millis() - lastRefresh >= 200) {
+            currentMenu(MENU_REFRESH);
+            lastRefresh = millis();
+        }
     }
 }
