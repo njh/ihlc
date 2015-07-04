@@ -94,7 +94,6 @@ static void testInputs(char action)
         switchMenus(mainMenu);
         break;
     case MENU_SETUP:
-        lcd.clear();
         lcd.println("Input State:");
         lcd.println();
         lcd.println("  12345678");
@@ -121,7 +120,6 @@ static void testInputs(char action)
 static void mainMenu(char action)
 {
     if (action == MENU_SETUP) {
-        lcd.clear();
         lcd.println(F("IHLC Main Menu"));
         lcd.println(F(" All Off"));     // 1
         lcd.println(F(" All On"));      // 2
