@@ -1,6 +1,7 @@
 #include "ihlc.h"
 
 #include <UC1701.h>
+#include <DMXSerial.h>
 #include <IndIOButtonPanel.h>
 
 
@@ -15,6 +16,8 @@ static const unsigned char arrowDown[] = { 0x10, 0x20, 0x7e, 0x20, 0x10 };
 // Pointer to the current menu function
 static char currentMenuItem = 1;
 menuFunc_t currentMenu = NULL;
+static byte testChannel = 1;
+static byte testValue = 0;
 
 // Menu action definitions
 //const int NONE_PRESSED = 0;
@@ -60,31 +63,60 @@ static char scrollMenuItemCursor(char button, char max=6)
     return -1;
 }
 
-
-static void menu1(char action)
+static void testChannelMenu(char action)
 {
-    if (action == MENU_SETUP) {
-        lcd.println(F("Sub Menu 1"));
-        lcd.println(F(" Item 1"));
-        lcd.println(F(" Item 2"));
-        lcd.println(F(" Exit"));
-    }
-
-    char item = scrollMenuItemCursor(action, 3);
-    switch (item) {
-    case 1:
-        lcd.clear();
-        lcd.println(F("Selected 1"));
-        break;
-    case 2:
-        lcd.clear();
-        lcd.println(F("Selected 2"));
-        break;
-    case 3:
+    switch (action) {
+    case MENU_SETUP:
+         lcd.print(F("Test brightness"));
+         break;
+    case ENTER_PRESSED:
         switchMenus(mainMenu);
+        return;
+    case UP_PRESSED:
+        if (testValue >= 90)
+            testValue = 100;
+        else
+            testValue += 10;
+        break;
+    case DOWN_PRESSED:
+        if (testValue <= 10)
+            testValue = 0;
+        else
+            testValue -= 10;
         break;
     }
 
+    lcd.setCursor(8*7, 3);
+    lcd.print(testValue, DEC);
+    lcd.print("%  ");
+    
+    DMXSerial.write(testChannel, map(testValue, 0, 100, 0, 255));
+}
+
+static void testChooseChannelMenu(char action)
+{
+    switch (action) {
+    case MENU_SETUP:
+         lcd.println(F("Choose a channel:"));
+         break;
+    case ENTER_PRESSED:
+        switchMenus(testChannelMenu);
+        return;
+    case UP_PRESSED:
+        testChannel++;
+        if (testChannel > NUM_CHANNELS)
+            testChannel = NUM_CHANNELS;
+        break;
+    case DOWN_PRESSED:
+        testChannel--;
+        if (testChannel < 1)
+            testChannel = 1;
+        break;
+    }
+
+    lcd.setCursor(8*7, 3);
+    lcd.print(testChannel, DEC);
+    lcd.print("  ");
 }
 
 static void testInputs(char action)
@@ -121,11 +153,11 @@ static void mainMenu(char action)
 {
     if (action == MENU_SETUP) {
         lcd.println(F("IHLC Main Menu"));
-        lcd.println(F(" All Off"));     // 1
-        lcd.println(F(" All On"));      // 2
-        lcd.println(F(" Sub Menu 2"));  // 3
-        lcd.println(F(" Test Inputs")); // 4
-        lcd.println(F(" Reset"));       // 5
+        lcd.println(F(" All Off"));      // 1
+        lcd.println(F(" All On"));       // 2
+        lcd.println(F(" Test Channel")); // 3
+        lcd.println(F(" Test Inputs"));  // 4
+        lcd.println(F(" Reset"));        // 5
     }
 
     char item = scrollMenuItemCursor(action, 5);
@@ -137,7 +169,7 @@ static void mainMenu(char action)
         setAll(255);
         break;
     case 3:
-        switchMenus(menu1);
+        switchMenus(testChooseChannelMenu);
         break;
     case 4:
         switchMenus(testInputs);
