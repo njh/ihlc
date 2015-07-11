@@ -66,9 +66,10 @@ void performFades()
 
         for(int i=1; i <= NUM_CHANNELS; i++) {
             byte current = DMXSerial.read(i);
-            if (current < targetDmxValues[i]) {
+            byte target = map(targetDmxValues[i], 0, 100, 0, 255);
+            if (current < target) {
                 DMXSerial.write(i, current + 1);
-            } else if (current > targetDmxValues[i]) {
+            } else if (current > target) {
                 DMXSerial.write(i, current - 1);
             }
         }
@@ -79,7 +80,12 @@ void performFades()
 
 void setChannel(int channel, uint8_t value)
 {
-    targetDmxValues[channel] = map(value, 0, 100, 0, 255);
+    targetDmxValues[channel] = value;
+}
+
+uint8_t getChannel(int channel)
+{
+    return targetDmxValues[channel];
 }
 
 void setAllChannels(uint8_t value)
@@ -88,4 +94,3 @@ void setAllChannels(uint8_t value)
         setChannel(i, value);
     }
 }
-

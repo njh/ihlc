@@ -5,4 +5,5 @@
 
 // Values should be between 0 and 100
 void setChannel(int channel, uint8_t value);
+uint8_t getChannel(int channel);
 void setAllChannels(uint8_t value);

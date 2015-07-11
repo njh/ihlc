@@ -17,7 +17,6 @@ static const unsigned char arrowDown[] = { 0x10, 0x20, 0x7e, 0x20, 0x10 };
 static char currentMenuItem = 1;
 menuFunc_t currentMenu = NULL;
 static byte testChannel = 1;
-static byte testValue = 0;
 
 // Menu action definitions
 //const int NONE_PRESSED = 0;
@@ -65,6 +64,8 @@ static char scrollMenuItemCursor(char button, char max=6)
 
 static void testChannelMenu(char action)
 {
+    byte value = getChannel(testChannel);
+
     switch (action) {
     case MENU_SETUP:
         lcd.print(F("Test brightness"));
@@ -73,24 +74,22 @@ static void testChannelMenu(char action)
         switchMenus(mainMenu);
         return;
     case UP_PRESSED:
-        if (testValue >= 90)
-            testValue = 100;
+        if (value >= 90)
+            setChannel(testChannel, 100);
         else
-            testValue += 10;
+            setChannel(testChannel, value + 10);
         break;
     case DOWN_PRESSED:
-        if (testValue <= 10)
-            testValue = 0;
+        if (value <= 10)
+            setChannel(testChannel, 0);
         else
-            testValue -= 10;
+            setChannel(testChannel, value - 10);
         break;
     }
 
     lcd.setCursor(8*7, 3);
-    lcd.print(testValue, DEC);
+    lcd.print(value, DEC);
     lcd.print("%  ");
-
-    setChannel(testChannel, testValue);
 }
 
 static void testChooseChannelMenu(char action)
