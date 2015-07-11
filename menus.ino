@@ -89,7 +89,7 @@ static void testChannelMenu(char action)
 
     lcd.setCursor(8*7, 3);
     lcd.print(value, DEC);
-    lcd.print("%  ");
+    lcd.print(F("%  "));
 }
 
 static void testChooseChannelMenu(char action)
@@ -115,7 +115,7 @@ static void testChooseChannelMenu(char action)
 
     lcd.setCursor(8*7, 3);
     lcd.print(testChannel, DEC);
-    lcd.print("  ");
+    lcd.print(F("  "));
 }
 
 static void testInputs(char action)
@@ -125,10 +125,10 @@ static void testInputs(char action)
         switchMenus(mainMenu);
         break;
     case MENU_SETUP:
-        lcd.println("Input State:");
+        lcd.println(F("Input State:"));
         lcd.println();
-        lcd.println("  12345678");
-        lcd.print("  ");
+        lcd.println(F("  12345678"));
+        lcd.print(F("  "));
         for(int pin=1; pin <= 8; pin++) {
             lcd.write(0x02);
         }
