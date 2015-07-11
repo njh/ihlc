@@ -24,8 +24,7 @@
 
 
 static const int rs485EnablePin = 9;
-
-int currentValue = 0;
+static byte targetDmxValues[NUM_CHANNELS];
 
 
 void setup()
@@ -34,9 +33,14 @@ void setup()
     setupMenus();
 
     // Setup RS-485
-    DMXSerial.init(DMXController);
     pinMode(rs485EnablePin, OUTPUT);
     digitalWrite(rs485EnablePin, HIGH);
+    DMXSerial.init(DMXController);
+
+    // Set target DMX values to 0
+    for (int i=1; i<NUM_CHANNELS; i++) {
+        targetDmxValues[i] = 0;
+    }
 
     // Set all the channels on the IND.I/O Baseboard to Input
     for(int i=1; i<=8; i++) {
@@ -49,17 +53,39 @@ void setup()
 void loop()
 {
     handleMenus();
+    performFades();
+}
 
-    if (Indio.digitalRead(1)) {
-        DMXSerial.write(6, 255);
-    } else {
-        DMXSerial.write(6, 0);
+
+void performFades()
+{
+    static unsigned long lastFade = 0;
+    unsigned long now = micros();
+
+    if ((now - lastFade) > FADE_DELAY_US) {
+
+        for(int i=1; i <= NUM_CHANNELS; i++) {
+            byte current = DMXSerial.read(i);
+            if (current < targetDmxValues[i]) {
+                DMXSerial.write(i, current + 1);
+            } else if (current > targetDmxValues[i]) {
+                DMXSerial.write(i, current - 1);
+            }
+        }
+
+        lastFade = now;
     }
 }
 
-void setAll(uint8_t value)
+void setChannel(int channel, uint8_t value)
+{
+    targetDmxValues[channel] = map(value, 0, 100, 0, 255);
+}
+
+void setAllChannels(uint8_t value)
 {
     for(int i=1; i <= NUM_CHANNELS; i++) {
-        DMXSerial.write(i, value);
+        setChannel(i, value);
     }
 }
+

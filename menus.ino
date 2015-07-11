@@ -67,8 +67,8 @@ static void testChannelMenu(char action)
 {
     switch (action) {
     case MENU_SETUP:
-         lcd.print(F("Test brightness"));
-         break;
+        lcd.print(F("Test brightness"));
+        break;
     case ENTER_PRESSED:
         switchMenus(mainMenu);
         return;
@@ -89,16 +89,16 @@ static void testChannelMenu(char action)
     lcd.setCursor(8*7, 3);
     lcd.print(testValue, DEC);
     lcd.print("%  ");
-    
-    DMXSerial.write(testChannel, map(testValue, 0, 100, 0, 255));
+
+    setChannel(testChannel, testValue);
 }
 
 static void testChooseChannelMenu(char action)
 {
     switch (action) {
     case MENU_SETUP:
-         lcd.println(F("Choose a channel:"));
-         break;
+        lcd.println(F("Choose a channel:"));
+        break;
     case ENTER_PRESSED:
         switchMenus(testChannelMenu);
         return;
@@ -163,10 +163,10 @@ static void mainMenu(char action)
     char item = scrollMenuItemCursor(action, 5);
     switch (item) {
     case 1:
-        setAll(0);
+        setAllChannels(0);
         break;
     case 2:
-        setAll(255);
+        setAllChannels(100);
         break;
     case 3:
         switchMenus(testChooseChannelMenu);
