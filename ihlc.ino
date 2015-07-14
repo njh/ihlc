@@ -26,6 +26,20 @@
 static const int rs485EnablePin = 9;
 static byte targetDmxValues[NUM_CHANNELS];
 
+static char sceneData[][NUM_CHANNELS] = {
+    { 0,     0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0 },   // 0: All Off
+    { 100,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1 },   // 1
+    { 50,   -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1 },   // 2
+    { 0,    -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1 },   // 3
+    { -1,   -1,  -1,  -1,  -1, 100,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1 },   // 4
+    { -1,   -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1 },   // 5
+    { -1,   -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1 },   // 6
+    { -1,   -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1 },   // 7
+    { 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100 },   // 8: All On
+};
+
+static const byte numScenes = sizeof(sceneData);
+
 
 void setup()
 {
@@ -53,6 +67,7 @@ void setup()
 void loop()
 {
     handleMenus();
+    handleInputs();
     performFades();
 }
 
@@ -78,6 +93,20 @@ void performFades()
     }
 }
 
+void setScene(uint8_t scene)
+{
+    for(int i=1; i <= NUM_CHANNELS; i++) {
+        char value = sceneData[scene][i-1];
+        if (value >= 0) {
+            if (value != getChannel(i)) {
+                setChannel(i, value);
+            } else {
+                setChannel(i, 0);
+            }
+        }
+    }
+}
+
 void setChannel(int channel, uint8_t value)
 {
     targetDmxValues[channel] = value;
@@ -93,4 +122,54 @@ void setAllChannels(uint8_t value)
     for(int i=1; i <= NUM_CHANNELS; i++) {
         setChannel(i, value);
     }
+}
+
+
+void handleInputs()
+{
+    int pressed = readInputs();
+
+    if (pressed) {
+        setScene(pressed);
+    }
+}
+
+byte firstSetBit(int value)
+{
+    for(byte pin=1; pin <= 8; pin++) {
+        if (bitRead(value, pin*2-2)) {
+            return pin;
+        }
+    }
+    return 0;
+}
+
+
+static const long debounceDelay = 100;
+
+byte readInputs()
+{
+    static byte lastPressed = 0;
+    static int lastReadState = 0;
+    static int lastDebounceTime = 0;
+    byte result = 0;
+
+    // Read the current input state
+    int reading = Indio.gpio_read();
+
+    // Reset the debounce if the last read state has changed.
+    if (reading != lastReadState) {
+        lastDebounceTime = millis();
+    }
+    lastReadState = reading;
+
+    if ((millis() - lastDebounceTime) > debounceDelay) {
+        byte pressed = firstSetBit(reading);
+        if (pressed != lastPressed) {
+            result = pressed;
+        }
+        lastPressed = pressed;
+    }
+
+    return result;
 }

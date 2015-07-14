@@ -7,3 +7,6 @@
 void setChannel(int channel, uint8_t value);
 uint8_t getChannel(int channel);
 void setAllChannels(uint8_t value);
+
+
+void setScene(uint8_t scene);
