@@ -145,13 +145,13 @@ byte firstSetBit(int value)
 }
 
 
-static const long debounceDelay = 100;
+static const unsigned long debounceDelay = 100;
 
 byte readInputs()
 {
     static byte lastPressed = 0;
     static int lastReadState = 0;
-    static int lastDebounceTime = 0;
+    static unsigned int lastDebounceTime = 0;
     byte result = 0;
 
     // Read the current input state
