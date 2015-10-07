@@ -147,6 +147,39 @@ static void testInputs(char action)
     }
 }
 
+static void testCycle(char action)
+{
+    static unsigned long currentChannel = 1;
+    static unsigned long lastChange = 0;
+    static char step = 1;
+
+    switch(action) {
+    case ENTER_PRESSED:
+        switchMenus(mainMenu);
+        break;
+    }
+    
+    if (millis() - lastChange >= 600) {
+        if (currentChannel >= NUM_CHANNELS) {
+            step = -1;
+        } else if (currentChannel <= 1) {
+            step = 1;
+        }
+        
+        lcd.setCursor(8*7, 3);
+        lcd.print(currentChannel, DEC);
+        lcd.print(F("  "));
+        
+        if (step == 1) {
+            setChannel(currentChannel, 255);
+        } else {
+            setChannel(currentChannel, 0);
+        }
+
+        currentChannel += step;
+        lastChange = millis();
+    }
+}
 
 static void mainMenu(char action)
 {
@@ -156,10 +189,11 @@ static void mainMenu(char action)
         lcd.println(F(" All On"));       // 2
         lcd.println(F(" Test Channel")); // 3
         lcd.println(F(" Test Inputs"));  // 4
-        lcd.println(F(" Reset"));        // 5
+        lcd.println(F(" Test Cycle"));  // 5
+        lcd.println(F(" Reset"));        // 6
     }
 
-    char item = scrollMenuItemCursor(action, 5);
+    char item = scrollMenuItemCursor(action, 6);
     switch (item) {
     case 1:
         setAllChannels(0);
@@ -174,6 +208,9 @@ static void mainMenu(char action)
         switchMenus(testInputs);
         break;
     case 5:
+        switchMenus(testCycle);
+        break;
+    case 6:
         lcd.clear();
         soft_restart();
         break;
