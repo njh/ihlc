@@ -93,13 +93,25 @@ void performFades()
 
 void setScene(uint8_t scene)
 {
+    // First check if the scene has already been set
+    bool switchOff = true;
     for(int i=1; i <= NUM_CHANNELS; i++) {
         char value = sceneData[scene][i-1];
         if (value >= 0) {
             if (value != getChannel(i)) {
-                setChannel(i, value);
-            } else {
+                switchOff = false;
+                break;
+            }
+        }
+    }
+
+    for(int i=1; i <= NUM_CHANNELS; i++) {
+        char value = sceneData[scene][i-1];
+        if (value >= 0) {
+            if (switchOff) {
                 setChannel(i, 0);
+            } else {
+                setChannel(i, value);
             }
         }
     }
