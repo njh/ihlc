@@ -46,15 +46,13 @@ void setup()
     // Setup the screen and panel buttons
     setupMenus();
 
-    // Setup RS-485
+    // Setup RS-485 / DMX
     pinMode(rs485EnablePin, OUTPUT);
     digitalWrite(rs485EnablePin, HIGH);
     DMXSerial.init(DMXController);
 
-    // Set target DMX values to 0
-    for (int i=1; i<NUM_CHANNELS; i++) {
-        targetDmxValues[i] = 0;
-    }
+    // Switch off all channels
+    setAllChannels(0);
 
     // Set all the channels on the IND.I/O Baseboard to Input
     for(int i=1; i<=8; i++) {
@@ -79,13 +77,13 @@ void performFades()
 
     if ((now - lastFade) > FADE_DELAY_US) {
 
-        for(int i=1; i <= NUM_CHANNELS; i++) {
-            byte current = DMXSerial.read(i);
+        for(int i=0; i < NUM_CHANNELS; i++) {
+            byte current = DMXSerial.read(i+1);
             byte target = map(targetDmxValues[i], 0, 100, 0, 255);
             if (current < target) {
-                DMXSerial.write(i, current + 1);
+                DMXSerial.write(i+1, current + 1);
             } else if (current > target) {
-                DMXSerial.write(i, current - 1);
+                DMXSerial.write(i+1, current - 1);
             }
         }
 
@@ -109,18 +107,18 @@ void setScene(uint8_t scene)
 
 void setChannel(int channel, uint8_t value)
 {
-    targetDmxValues[channel] = value;
+    targetDmxValues[channel-1] = value;
 }
 
 uint8_t getChannel(int channel)
 {
-    return targetDmxValues[channel];
+    return targetDmxValues[channel-1];
 }
 
 void setAllChannels(uint8_t value)
 {
-    for(int i=1; i <= NUM_CHANNELS; i++) {
-        setChannel(i, value);
+    for(int i=0; i < NUM_CHANNELS; i++) {
+        targetDmxValues[i] = value;
     }
 }
 
