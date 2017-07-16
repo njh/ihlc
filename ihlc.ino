@@ -12,8 +12,6 @@
 
 */
 
-#include <Wire.h>
-
 #include <DMXSerial.h>
 #include <Indio.h>
 #include <SoftReset.h>

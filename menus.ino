@@ -1,7 +1,6 @@
 #include "ihlc.h"
 
 #include <UC1701.h>
-#include <DMXSerial.h>
 #include <IndIOButtonPanel.h>
 
 
