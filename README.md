@@ -27,6 +27,13 @@ Block Diagram
 ![Block Diagram](https://raw.github.com/njh/ihlc/master/docs/ihlc_block_diagram.png "Block Diagram")
 
 
+Wiring
+------
+
+RS-485 Terminal A = D+
+RS-485 Terminal B = D-
+
+
 [Industruino IND.I/O]:  http://industruino.com/shop/product/industruino-ind-i-o-kit-2
 [Industruino Ethernet Module]:  http://industruino.com/shop/product/ethernet-expansion-module-10
 [Active Modules D206]:  http://www.activemodules.co.uk/dinrdmx6.html
